@@ -351,7 +351,7 @@ void bswap(int kk, int n, int *nrepr,
 	    double ammax, cmd;
 	    ammax = 0.;
 #if defined(_OPENMP)
-      #pragma omp parallel for default(shared) private(cmd, i, j) schedule(dynamic)
+            #pragma omp parallel for default(shared) private(cmd, i, j) schedule(dynamic)
 #endif
 	    for (i = 1; i <= n; ++i) {
 		if (nrepr[i] == 0) {
@@ -362,7 +362,7 @@ void bswap(int kk, int n, int *nrepr,
 			    beter[i] += cmd;
 		    }
 #if defined(_OPENMP)
-        #pragma omp critical
+                    #pragma omp critical
 #endif
 		    if (ammax <= beter[i]) {
 			/*  does < (instead of <= ) work too? -- NO! */
@@ -378,7 +378,7 @@ void bswap(int kk, int n, int *nrepr,
 
 	    /* update dysma[] : dysma[j] = D(j, nearest_representative) */
 #if defined(_OPENMP)
-       #pragma omp parallel for default(shared) private(j, ij) schedule(dynamic)
+            #pragma omp parallel for default(shared) private(j, ij) schedule(dynamic)
 #endif
 	    for (j = 1; j <= n; ++j) {
 		ij = ind_2(nmax, j);
@@ -409,9 +409,9 @@ void bswap(int kk, int n, int *nrepr,
     #pragma omp parallel for default(shared) private(j) reduction(+:sky)
 #endif
     for (j = 1; j <= n; ++j)
-  {
+    {
 	sky += dysma[j];
-  }
+    }
     obj[0] = sky / n;
 
     if (do_swap && (kk > 1 || med_given)) {
@@ -445,7 +445,7 @@ void bswap(int kk, int n, int *nrepr,
     L60:
 	if(pamonce == 0) { // original algorihtm
 #if defined(_OPENMP)
-      #pragma omp parallel for default(shared) private(i, j, ij) schedule(dynamic)
+            #pragma omp parallel for default(shared) private(i, j, ij) schedule(dynamic)
 #endif
 	    for (j = 1; j <= n; ++j) {
 		/*  dysma[j] := D_j  d(j, <closest medi>)  [KR p.102, 104]
@@ -466,7 +466,7 @@ void bswap(int kk, int n, int *nrepr,
 	    }
 	} else { // pamonce == 1 or == 2 :
 #if defined(_OPENMP)
-      #pragma omp parallel for default(shared) private(i, j, ij, k) schedule(dynamic)
+            #pragma omp parallel for default(shared) private(i, j, ij, k) schedule(dynamic)
 #endif
 	    for (j = 1; j <= n; ++j) {
 		/*  dysma[j] := D_j  d(j, <closest medi>)  [KR p.102, 104]
@@ -494,7 +494,7 @@ void bswap(int kk, int n, int *nrepr,
 	    for (h = 1; h <= n; ++h) if (!nrepr[h]) {
 		    R_CheckUserInterrupt();
 #if defined(_OPENMP)
-        #pragma omp parallel for default(shared) private(i, j, ij) schedule(dynamic)
+                    #pragma omp parallel for default(shared) private(i, j, ij) schedule(dynamic)
 #endif
 		    for (i = 1; i <= n; ++i) if (nrepr[i]) {
 			    double dz = 0.;
@@ -509,7 +509,7 @@ void bswap(int kk, int n, int *nrepr,
 				    dz += (- dysma[j] + dys[hj]);
 			    }
 #if defined(_OPENMP)
-      #pragma omp critical
+                            #pragma omp critical
 #endif
 			    if (dzsky > dz) {
 				dzsky = dz; /* dzsky := min_{i,h} T_{i,h} */
@@ -525,7 +525,7 @@ void bswap(int kk, int n, int *nrepr,
 		double removeCost = 0.;
 		//Compute cost for removing the medoid
 #if defined(_OPENMP)
-    #pragma omp parallel for default(shared) private(j) reduction(+:removeCost) schedule(dynamic)
+                #pragma omp parallel for default(shared) private(j) reduction(+:removeCost) schedule(dynamic)
 #endif
 		for (j = 1; j <= n; ++j) {
 		    if(clustmembership[j] == i) {
@@ -552,7 +552,7 @@ void bswap(int kk, int n, int *nrepr,
 				    addGain += (dys[hj]-fvect[j]);
 			    }
 #if defined(_OPENMP)
-          #pragma omp critical
+                            #pragma omp critical
 #endif
 			    if (dzsky > addGain) {
 				dzsky = addGain; /* dzsky := min_{i,h} T_{i,h} */
@@ -564,7 +564,7 @@ void bswap(int kk, int n, int *nrepr,
 		    }
 		} else { // pamonce == 2 :
 #if defined(_OPENMP)
-        #pragma omp parallel for default(shared) private(h, j) schedule(dynamic)
+                    #pragma omp parallel for default(shared) private(h, j) schedule(dynamic)
 #endif
 		    // Now check possible new medoids h
 		    for (h = 1; h <= n; ++h) if (!nrepr[h]) {
@@ -583,7 +583,7 @@ void bswap(int kk, int n, int *nrepr,
 				    addGain += (dys[ijbase]-fvect[j]);
 			    }
 #if defined(_OPENMP)
-          #pragma omp critical
+                            #pragma omp critical
 #endif
 			    if (dzsky > addGain) {
 				dzsky = addGain; /* dzsky := min_{i,h} T_{i,h} */
