@@ -323,6 +323,7 @@ void bswap(int kk, int n, int *nrepr,
 	if(trace_lev) Rprintf("medoids given\n");
 
 	/* compute dysma[] : dysma[j] = D(j, nearest_representative) */
+	/* TODO parallelize this too?*/
 	for (i = 1; i <= n; ++i) {
 	    if (nrepr[i] == 1)
 		for (j = 1; j <= n; ++j) {
@@ -349,6 +350,9 @@ void bswap(int kk, int n, int *nrepr,
 	    int nmax = -1; /* -Wall */
 	    double ammax, cmd;
 	    ammax = 0.;
+#if defined(_OPENMP)
+      #pragma omp parallel for default(shared) private(cmd, i, j) schedule(dynamic)
+#endif
 	    for (i = 1; i <= n; ++i) {
 		if (nrepr[i] == 0) {
 		    beter[i] = 0.;
@@ -357,6 +361,9 @@ void bswap(int kk, int n, int *nrepr,
 			if (cmd > 0.)
 			    beter[i] += cmd;
 		    }
+#if defined(_OPENMP)
+        #pragma omp critical
+#endif
 		    if (ammax <= beter[i]) {
 			/*  does < (instead of <= ) work too? -- NO! */
 			ammax = beter[i];
@@ -370,6 +377,9 @@ void bswap(int kk, int n, int *nrepr,
 		Rprintf("    new repr. %d\n", nmax);
 
 	    /* update dysma[] : dysma[j] = D(j, nearest_representative) */
+#if defined(_OPENMP)
+       #pragma omp parallel for default(shared) private(j, ij) schedule(dynamic)
+#endif
 	    for (j = 1; j <= n; ++j) {
 		ij = ind_2(nmax, j);
 		if (dysma[j] > dys[ij])
