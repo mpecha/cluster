@@ -405,8 +405,13 @@ void bswap(int kk, int n, int *nrepr,
     } else dig_n = 1;// -Wall
 
     sky = 0.;
+#if defined(_OPENMP)
+    #pragma omp parallel for default(shared) private(j) reduction(+:sky)
+#endif
     for (j = 1; j <= n; ++j)
+  {
 	sky += dysma[j];
+  }
     obj[0] = sky / n;
 
     if (do_swap && (kk > 1 || med_given)) {
@@ -439,6 +444,9 @@ void bswap(int kk, int n, int *nrepr,
 /*--   Loop : */
     L60:
 	if(pamonce == 0) { // original algorihtm
+#if defined(_OPENMP)
+      #pragma omp parallel for default(shared) private(i, j, ij) schedule(dynamic)
+#endif
 	    for (j = 1; j <= n; ++j) {
 		/*  dysma[j] := D_j  d(j, <closest medi>)  [KR p.102, 104]
 		 *  dysmb[j] := E_j  d(j, <2-nd cl.medi>)  [p.103] */
@@ -482,6 +490,9 @@ void bswap(int kk, int n, int *nrepr,
 	if(pamonce == 0) { // original algorihtm
 	    for (h = 1; h <= n; ++h) if (!nrepr[h]) {
 		    R_CheckUserInterrupt();
+#if defined(_OPENMP)
+        #pragma omp parallel for default(shared) private(i, j, ij) schedule(dynamic)
+#endif
 		    for (i = 1; i <= n; ++i) if (nrepr[i]) {
 			    double dz = 0.;
 			    /* dz := T_{ih} := sum_j C_{jih}  [p.104] : */
@@ -494,6 +505,9 @@ void bswap(int kk, int n, int *nrepr,
 				} else if (dys[hj] < dysma[j]) /* 1c. */
 				    dz += (- dysma[j] + dys[hj]);
 			    }
+#if defined(_OPENMP)
+      #pragma omp critical
+#endif
 			    if (dzsky > dz) {
 				dzsky = dz; /* dzsky := min_{i,h} T_{i,h} */
 				hbest = h;
@@ -502,6 +516,7 @@ void bswap(int kk, int n, int *nrepr,
 			}
 		}
 	} else { // pamonce == 1 or == 2 :
+
 	    for(k = 1; k <= kk; k++) {
 		R_CheckUserInterrupt();
 		i=medoids[k];
