@@ -4,6 +4,9 @@
  * original Id: pam.f,v 1.16 2003/06/03 13:40:56 maechler translated by
  * f2c (version 20031025) and run through f2c-clean,v 1.10 2002/03/28
  */
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
 
 #include <float.h>
 
