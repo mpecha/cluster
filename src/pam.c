@@ -465,6 +465,9 @@ void bswap(int kk, int n, int *nrepr,
 		}
 	    }
 	} else { // pamonce == 1 or == 2 :
+#if defined(_OPENMP)
+      #pragma omp parallel for default(shared) private(i, j, ij, k) schedule(dynamic)
+#endif
 	    for (j = 1; j <= n; ++j) {
 		/*  dysma[j] := D_j  d(j, <closest medi>)  [KR p.102, 104]
 		 *  dysmb[j] := E_j  d(j, <2-nd cl.medi>)  [p.103] */
@@ -516,12 +519,14 @@ void bswap(int kk, int n, int *nrepr,
 			}
 		}
 	} else { // pamonce == 1 or == 2 :
-
 	    for(k = 1; k <= kk; k++) {
 		R_CheckUserInterrupt();
 		i=medoids[k];
 		double removeCost = 0.;
 		//Compute cost for removing the medoid
+#if defined(_OPENMP)
+    #pragma omp parallel for default(shared) private(j) reduction(+:removeCost) schedule(dynamic)
+#endif
 		for (j = 1; j <= n; ++j) {
 		    if(clustmembership[j] == i) {
 			removeCost+=(dysmb[j]-dysma[j]);
@@ -534,7 +539,11 @@ void bswap(int kk, int n, int *nrepr,
 
 		if (pamonce == 1) {
 		    // Now check possible new medoids h
-		    for (h = 1; h <= n; ++h) if (!nrepr[h]) {
+#if defined(_OPENMP)
+		    #pragma omp parallel for default(shared) private(h, j) schedule(dynamic)
+#endif
+		    for (h = 1; h <= n; ++h) {
+		      if (!nrepr[h]) {
 			    double addGain = removeCost;
 			    // Compute gain of adding h as a medoid:
 			    for (j = 1; j <= n; ++j) {
@@ -542,6 +551,9 @@ void bswap(int kk, int n, int *nrepr,
 				if(dys[hj] < fvect[j])
 				    addGain += (dys[hj]-fvect[j]);
 			    }
+#if defined(_OPENMP)
+          #pragma omp critical
+#endif
 			    if (dzsky > addGain) {
 				dzsky = addGain; /* dzsky := min_{i,h} T_{i,h} */
 				hbest = h;
@@ -549,7 +561,7 @@ void bswap(int kk, int n, int *nrepr,
 				kbest = k;
 			    }
 			}
-
+		    }
 		} else { // pamonce == 2 :
 
 		    // Now check possible new medoids h
