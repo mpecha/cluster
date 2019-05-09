@@ -563,7 +563,9 @@ void bswap(int kk, int n, int *nrepr,
 			}
 		    }
 		} else { // pamonce == 2 :
-
+#if defined(_OPENMP)
+        #pragma omp parallel for default(shared) private(h, j) schedule(dynamic)
+#endif
 		    // Now check possible new medoids h
 		    for (h = 1; h <= n; ++h) if (!nrepr[h]) {
 			    double addGain = removeCost - fvect[h]; // - fvect[h] since dys[h,h]=0;
@@ -580,6 +582,9 @@ void bswap(int kk, int n, int *nrepr,
 				if(dys[ijbase] < fvect[j])
 				    addGain += (dys[ijbase]-fvect[j]);
 			    }
+#if defined(_OPENMP)
+          #pragma omp critical
+#endif
 			    if (dzsky > addGain) {
 				dzsky = addGain; /* dzsky := min_{i,h} T_{i,h} */
 				hbest = h;
